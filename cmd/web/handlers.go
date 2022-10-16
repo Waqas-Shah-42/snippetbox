@@ -8,7 +8,7 @@ import (
 	"text/template"
 )
 
-func home(w http.ResponseWriter, r *http.Request) {
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	// ending request if request is not made to the root.
 	if r.URL.Path != "/" {
@@ -17,7 +17,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	files := []string{
-		"./ui/html/base.tmpl.html",
+		"./ui/html/base.tmpl.html.blk",
 		"./ui/html/pages/home.tmpl.html",
 		"./ui/html/partials/nav.tmpl.html",
 
@@ -37,7 +37,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func snippetView(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	// extracting value of id parameter
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
@@ -48,7 +48,7 @@ func snippetView(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Displaying snippet with id %d...", id)
 }
 
-func snippetCreate(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 	// Restricting method to post method only
 	if r.Method != "POST" {
 		w.Header().Set("Allow", http.MethodPost)
