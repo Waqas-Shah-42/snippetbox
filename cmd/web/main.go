@@ -11,6 +11,11 @@ func main() {
 
 	mux := http.NewServeMux()
 
+	// Serve static files
+	fileServer := http.FileServer(http.Dir("./ui/static/"))
+	// remove /static prefix from path and server the file at /static/
+	mux.Handle("/static/", http.StripPrefix("/static",fileServer))
+
 	mux.HandleFunc("/", home)
 
 	mux.HandleFunc("/snippet/view", snippetView)
