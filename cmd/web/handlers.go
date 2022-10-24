@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"html/template"
 	"net/http"
 	"strconv"
 
@@ -17,28 +18,35 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// files := []string{
-	// 	"./ui/html/base.tmpl.html",
-	// 	"./ui/html/pages/home.tmpl.html",
-	// 	"./ui/html/partials/nav.tmpl.html",
-
-	// }
-	// ts, err := template.ParseFiles(files...)
-	// if err != nil {
-	// 	app.serverError(w,err)
-	// 	return
-	// }
-
-	// err = ts.ExecuteTemplate(w,"base", nil)
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// }
-
 	snippets, err := app.snippets.Latest()
 	if err != nil {
 		app.serverError(w,err)
 		return
 	}
+
+
+	files := []string{
+		"./ui/html/base.tmpl.html",
+		"./ui/html/pages/home.tmpl.html",
+		"./ui/html/partials/nav.tmpl.html",
+
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w,err)
+		return
+	}
+
+	data := &templateData{
+		Snippets: snippets,
+	}
+	err = ts.ExecuteTemplate(w,"base", data)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	
 
 	for _, snippet := range snippets {
 		fmt.Fprintf(w,"%+v\n", snippet)
@@ -63,12 +71,32 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	fmt.Fprintf(w,"%+v",snippet)
+
+	files := []string{
+		"./ui/html/base.tmpl.html",
+		"./ui/html/pages/view.tmpl.html",
+		"./ui/html/partials/nav.tmpl.html",
+
+	}
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w,err)
+		return
+	}
+
+	// 
+	data := &templateData{
+		Snippet: snippet,
+	}
+	err = ts.ExecuteTemplate(w,"base", data)
+	if err != nil {
+		app.serverError(w, err)
+	}
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 	// Restricting method to post method only
-	if r.Method != "POST" {
+	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
 		//http.Error(w, "Only POST methods allowed on this route", http.StatusMethodNotAllowed)
 		app.clientError(w, http.StatusMethodNotAllowed)
